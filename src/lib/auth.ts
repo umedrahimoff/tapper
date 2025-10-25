@@ -28,7 +28,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // In production, you'd verify credentials against database
         return {
           id: '1',
-          email: credentials.email,
+          email: credentials.email as string,
           name: 'Demo User',
           username: 'demo',
         }
