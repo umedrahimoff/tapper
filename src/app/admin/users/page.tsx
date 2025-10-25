@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Search, Filter, Plus, Edit, Trash2, Eye, UserCheck, UserX, UserPlus } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 interface User {
   id: string

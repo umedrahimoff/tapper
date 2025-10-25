@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable dev overlay
-  devIndicators: {
-    buildActivity: false,
-  }
+  // Next.js 15 configuration
 }
 
 module.exports = nextConfig
