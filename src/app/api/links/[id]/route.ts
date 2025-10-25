@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -22,9 +22,10 @@ export async function PUT(
       )
     }
 
+    const { id } = await params
     const link = await prisma.link.update({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id
       },
       data: { title, url }
@@ -42,7 +43,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -51,9 +52,10 @@ export async function DELETE(
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await params
     await prisma.link.delete({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id
       }
     })
