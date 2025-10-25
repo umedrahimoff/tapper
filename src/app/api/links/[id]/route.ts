@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
 
 export async function PUT(
   request: NextRequest,
@@ -23,13 +22,16 @@ export async function PUT(
     }
 
     const { id } = await params
-    const link = await prisma.link.update({
-      where: {
-        id: id,
-        userId: session.user.id
-      },
-      data: { title, url }
-    })
+    
+    // Mock response for demo
+    const link = {
+      id,
+      title,
+      url,
+      order: 0,
+      isActive: true,
+      userId: session.user.id
+    }
 
     return NextResponse.json(link)
   } catch (error) {
@@ -53,13 +55,8 @@ export async function DELETE(
     }
 
     const { id } = await params
-    await prisma.link.delete({
-      where: {
-        id: id,
-        userId: session.user.id
-      }
-    })
-
+    
+    // Mock response for demo
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Link deletion error:", error)

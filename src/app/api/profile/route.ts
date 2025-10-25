@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
 
 export async function PUT(request: NextRequest) {
   try {
@@ -12,33 +11,14 @@ export async function PUT(request: NextRequest) {
 
     const { name, username, bio, avatar } = await request.json()
 
-    // Check if username is already taken
-    if (username) {
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          username,
-          NOT: { id: session.user.id }
-        }
-      })
-
-      if (existingUser) {
-        return NextResponse.json(
-          { message: "Имя пользователя уже занято" },
-          { status: 400 }
-        )
-      }
+    // Mock response for demo
+    const updatedUser = {
+      id: session.user.id,
+      name,
+      username,
+      bio,
+      avatar,
     }
-
-    // Update user
-    const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
-      data: {
-        name,
-        username,
-        bio,
-        avatar,
-      }
-    })
 
     return NextResponse.json(updatedUser)
   } catch (error) {

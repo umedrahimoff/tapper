@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
 
 export async function GET() {
   try {
@@ -10,10 +9,11 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    const links = await prisma.link.findMany({
-      where: { userId: session.user.id },
-      orderBy: { order: 'asc' }
-    })
+    // Mock data for demo
+    const links = [
+      { id: '1', title: 'Instagram', url: 'https://instagram.com/demo', order: 0, isActive: true },
+      { id: '2', title: 'Twitter', url: 'https://twitter.com/demo', order: 1, isActive: true }
+    ]
 
     return NextResponse.json(links)
   } catch (error) {
@@ -42,22 +42,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get the highest order number
-    const lastLink = await prisma.link.findFirst({
-      where: { userId: session.user.id },
-      orderBy: { order: 'desc' }
-    })
-
-    const newOrder = lastLink ? lastLink.order + 1 : 0
-
-    const link = await prisma.link.create({
-      data: {
-        title,
-        url,
-        order: newOrder,
-        userId: session.user.id
-      }
-    })
+    // Mock response for demo
+    const link = {
+      id: Date.now().toString(),
+      title,
+      url,
+      order: 0,
+      isActive: true,
+      userId: session.user.id
+    }
 
     return NextResponse.json(link)
   } catch (error) {
