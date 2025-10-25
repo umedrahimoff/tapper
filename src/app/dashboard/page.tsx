@@ -15,7 +15,8 @@ export default function DashboardPage() {
     links: [],
     views: 0,
     todayViews: 0,
-    thisWeekViews: 0
+    thisWeekViews: 0,
+    thisMonthViews: 0
   })
   const [loading, setLoading] = useState(true)
 
