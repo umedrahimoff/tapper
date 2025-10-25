@@ -12,6 +12,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-demo",
   trustHost: true,
+  debug: process.env.NODE_ENV === 'development',
   providers: [
     // Only add OAuth providers if environment variables are set
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
