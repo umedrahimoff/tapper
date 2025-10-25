@@ -10,7 +10,6 @@ export const safeLocalStorage = {
     try {
       return localStorage.getItem(key)
     } catch (error) {
-      console.warn('localStorage.getItem failed:', error)
       return null
     }
   },
@@ -22,7 +21,7 @@ export const safeLocalStorage = {
     try {
       localStorage.setItem(key, value)
     } catch (error) {
-      console.warn('localStorage.setItem failed:', error)
+      // localStorage setItem failed, continue
     }
   },
 
@@ -33,7 +32,7 @@ export const safeLocalStorage = {
     try {
       localStorage.removeItem(key)
     } catch (error) {
-      console.warn('localStorage.removeItem failed:', error)
+      // localStorage removeItem failed, continue
     }
   }
 }

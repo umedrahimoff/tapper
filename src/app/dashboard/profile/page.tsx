@@ -72,7 +72,7 @@ export default function ProfilePage() {
       if (response.ok) {
         const profileData = await response.json()
         
-        // Load avatar from localStorage for demo
+        // Load avatar from localStorage
         const savedAvatar = safeLocalStorage.getItem('user-avatar')
         
         setFormData({
@@ -105,7 +105,7 @@ export default function ProfilePage() {
       if (response.ok) {
         const updatedUser = await response.json()
         
-        // Save avatar to localStorage for demo
+        // Save avatar to localStorage
         if (formData.avatar) {
           safeLocalStorage.setItem('user-avatar', formData.avatar)
         } else {

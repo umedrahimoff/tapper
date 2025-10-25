@@ -59,7 +59,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         isActive: user.isActive,
       }
         } catch (error) {
-          console.error("Auth error:", error)
           return null
         }
       }
@@ -101,7 +100,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             })
           }
         } catch (error) {
-          console.error("User creation error:", error)
           return false
         }
       }

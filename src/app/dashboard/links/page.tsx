@@ -78,18 +78,7 @@ export default function LinksPage() {
 
   const fetchLinks = async () => {
     try {
-      // First try to load from localStorage for demo
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const savedLinks = localStorage.getItem('user-links')
-        if (savedLinks) {
-          const links = JSON.parse(savedLinks)
-          setLinks(links.sort((a: Link, b: Link) => a.order - b.order))
-          setLoading(false)
-          return
-        }
-      }
-      
-      // Fallback to API
+      // Load from API
       const response = await fetch('/api/links')
       if (response.ok) {
         const data = await response.json()
@@ -123,11 +112,7 @@ export default function LinksPage() {
         setFormData({ title: '', url: '' })
         setShowAddForm(false)
         
-        // Save to localStorage for demo
-        if (typeof window !== 'undefined' && window.localStorage) {
-          const updatedLinks = [...links, newLink].sort((a, b) => a.order - b.order)
-          localStorage.setItem('user-links', JSON.stringify(updatedLinks))
-        }
+        // Update local state
         
         fetchLinks()
       } else {
@@ -159,11 +144,7 @@ export default function LinksPage() {
         setEditingLink(null)
         setFormData({ title: '', url: '' })
         
-        // Update localStorage for demo
-        const updatedLinks = links.map(link => 
-          link.id === editingLink.id ? updatedLink : link
-        ).sort((a, b) => a.order - b.order)
-        localStorage.setItem('user-links', JSON.stringify(updatedLinks))
+        // Update local state
         
         fetchLinks()
       } else {
@@ -221,8 +202,7 @@ export default function LinksPage() {
 
       setLinks(newLinks)
       
-      // Update localStorage for demo
-      localStorage.setItem('user-links', JSON.stringify(newLinks))
+      // Update local state
     } catch (error) {
       toast.error('Ошибка при изменении порядка')
     }

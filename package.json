@@ -16,6 +16,8 @@
     "create-test-user": "node scripts/create-test-user.js",
     "list-users": "node scripts/list-users.js",
     "setup-production": "node scripts/setup-production.js",
+    "create-production-admin": "node scripts/create-production-admin.js",
+    "check-production": "node scripts/check-production.js",
     "postinstall": "prisma generate",
     "prisma:deploy": "prisma migrate deploy"
   },

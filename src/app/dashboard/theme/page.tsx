@@ -50,11 +50,7 @@ export default function ThemePage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Load theme from localStorage for demo
-    const savedTheme = localStorage.getItem('user-theme')
-    if (savedTheme) {
-      setCurrentTheme(savedTheme)
-    }
+    // Load theme from API
   }, [])
 
   const handleThemeChange = async (themeId: string) => {
@@ -71,8 +67,7 @@ export default function ThemePage() {
 
       if (response.ok) {
         setCurrentTheme(themeId)
-        // Save to localStorage for demo
-        localStorage.setItem('user-theme', themeId)
+        // Theme updated
         toast.success('Тема изменена!')
         await update()
       } else {

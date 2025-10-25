@@ -30,7 +30,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [userAvatar, setUserAvatar] = useState<string>('')
 
   useEffect(() => {
-    // Load avatar from localStorage for demo
+    // Load avatar from localStorage
     const savedAvatar = safeLocalStorage.getItem('user-avatar')
     if (savedAvatar) {
       setUserAvatar(savedAvatar)

@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === 'development' && !process.env.REDIS_HOST) {
       globalForRedis.redis = redis
     }
   } catch (error) {
-    console.warn('Redis connection failed, using fallback:', error)
+    // Redis connection failed, using fallback
     redis = null
   }
 }
@@ -43,7 +43,6 @@ export async function getCached<T>(key: string): Promise<T | null> {
     const cached = await redis.get(key)
     return cached ? JSON.parse(cached) : null
   } catch (error) {
-    console.warn('Redis cache miss:', error)
     return null
   }
 }
@@ -57,7 +56,7 @@ export async function setCached(key: string, data: any, ttlSeconds: number = 300
   try {
     await redis.setex(key, ttlSeconds, JSON.stringify(data))
   } catch (error) {
-    console.warn('Redis cache set error:', error)
+    // Cache set failed, continue without caching
   }
 }
 
@@ -70,7 +69,7 @@ export async function deleteCached(key: string): Promise<void> {
   try {
     await redis.del(key)
   } catch (error) {
-    console.warn('Redis cache delete error:', error)
+    // Cache delete failed, continue
   }
 }
 
@@ -86,6 +85,6 @@ export async function deleteCachedPattern(pattern: string): Promise<void> {
       await redis.del(...keys)
     }
   } catch (error) {
-    console.warn('Redis cache pattern delete error:', error)
+    // Cache pattern delete failed, continue
   }
 }

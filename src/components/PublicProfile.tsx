@@ -47,70 +47,10 @@ export default function PublicProfile({ user }: PublicProfileProps) {
     // Track view on component mount
     trackView()
 
-    // Save view to localStorage for demo
-    const saveViewToLocalStorage = () => {
-      const viewData = {
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        referer: document.referrer
-      }
-      
-      const existingViews = JSON.parse(localStorage.getItem('user-views') || '[]')
-      existingViews.push(viewData)
-      
-      // Keep only last 100 views to avoid localStorage overflow
-      if (existingViews.length > 100) {
-        existingViews.splice(0, existingViews.length - 100)
-      }
-      
-      localStorage.setItem('user-views', JSON.stringify(existingViews))
-    }
+    // Track view
 
-    saveViewToLocalStorage()
-
-    // Load data from localStorage for demo
-    const savedAvatar = localStorage.getItem('user-avatar')
-    const savedTheme = localStorage.getItem('user-theme')
-    const savedLinks = localStorage.getItem('user-links')
-    const savedProfile = localStorage.getItem('user-profile')
-
-    let updatedUser = { ...user }
-
-    // Update avatar if available
-    if (savedAvatar) {
-      updatedUser.avatar = savedAvatar
-    }
-
-    // Update theme if available
-    if (savedTheme) {
-      updatedUser.theme = savedTheme
-    }
-
-    // Update links if available
-    if (savedLinks) {
-      try {
-        const links = JSON.parse(savedLinks)
-        updatedUser.links = links.filter((link: any) => link.isActive !== false)
-      } catch (error) {
-        console.error('Error parsing saved links:', error)
-      }
-    } else {
-      // If no saved links, use empty array
-      updatedUser.links = []
-    }
-
-    // Update profile data if available
-    if (savedProfile) {
-      try {
-        const profile = JSON.parse(savedProfile)
-        updatedUser.name = profile.name || updatedUser.name
-        updatedUser.bio = profile.bio || updatedUser.bio
-      } catch (error) {
-        console.error('Error parsing saved profile:', error)
-      }
-    }
-
-    setUserData(updatedUser)
+    // Use user data as is
+    setUserData(user)
   }, [user])
 
   const copyUrl = async () => {

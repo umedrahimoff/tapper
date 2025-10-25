@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
+import { logger } from './logger'
 
 export function handleApiError(error: unknown, context: string) {
-  console.error(`${context} error:`, error)
+  logger.error(`${context} error`, context, error)
   
   // Check if it's a Prisma error
   if (error && typeof error === 'object' && 'code' in error) {
