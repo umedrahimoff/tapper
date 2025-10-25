@@ -50,12 +50,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return null
           }
 
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            username: user.username,
-          }
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        username: user.username,
+        role: user.role,
+        isActive: user.isActive,
+      }
         } catch (error) {
           console.error("Auth error:", error)
           return null
@@ -108,6 +110,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.username = user.username
+        token.role = user.role
+        token.isActive = user.isActive
       }
       return token
     },
@@ -115,6 +119,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token) {
         session.user.id = token.sub!
         session.user.username = token.username as string
+        session.user.role = token.role as string
+        session.user.isActive = token.isActive as boolean
       }
       return session
     },

@@ -11,7 +11,8 @@ import {
   Palette, 
   Settings, 
   LogOut,
-  LogIn
+  LogIn,
+  Shield
 } from "lucide-react"
 
 const navigation = [
@@ -119,6 +120,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </Link>
                 )
               })}
+              
             </nav>
             
             {/* User Profile & Logout - Fixed at bottom */}
@@ -145,13 +147,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <p className="text-xs text-gray-500 truncate">@{session.user.username}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => signOut()}
-                  className="ml-3 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                  title="Выйти"
-                >
-                  <LogOut className="h-5 w-5" />
-                </button>
+                <div className="flex items-center space-x-2">
+                  {session.user.role === 'admin' && (
+                          <Link
+                            href="/admin"
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                            title="Админ-панель"
+                          >
+                      <Shield className="h-5 w-5" />
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => signOut()}
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    title="Выйти"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

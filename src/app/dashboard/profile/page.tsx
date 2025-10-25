@@ -12,6 +12,7 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -60,17 +61,32 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (session?.user) {
-      // Load avatar from localStorage for demo
-      const savedAvatar = localStorage.getItem('user-avatar')
-      
-      setFormData({
-        name: session.user.name || '',
-        username: session.user.username || '',
-        bio: '',
-        avatar: savedAvatar || ''
-      })
+      loadProfileData()
     }
   }, [session])
+
+  const loadProfileData = async () => {
+    try {
+      const response = await fetch('/api/profile')
+      if (response.ok) {
+        const profileData = await response.json()
+        
+        // Load avatar from localStorage for demo
+        const savedAvatar = localStorage.getItem('user-avatar')
+        
+        setFormData({
+          name: profileData.name || '',
+          username: profileData.username || '',
+          bio: profileData.bio || '',
+          avatar: savedAvatar || profileData.avatar || ''
+        })
+      }
+    } catch (error) {
+      console.error('Error loading profile data:', error)
+    } finally {
+      setInitialLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -86,6 +102,8 @@ export default function ProfilePage() {
       })
 
       if (response.ok) {
+        const updatedUser = await response.json()
+        
         // Save avatar to localStorage for demo
         if (formData.avatar) {
           localStorage.setItem('user-avatar', formData.avatar)
@@ -93,12 +111,20 @@ export default function ProfilePage() {
           localStorage.removeItem('user-avatar')
         }
         
+        // Update local form data with the response
+        setFormData(prev => ({
+          ...prev,
+          name: updatedUser.name,
+          username: updatedUser.username,
+          bio: updatedUser.bio,
+          avatar: updatedUser.avatar
+        }))
+        
         // Dispatch custom event to update Layout
         window.dispatchEvent(new CustomEvent('avatar-updated'))
         
         toast.success('Профиль обновлен!')
         await update()
-        router.refresh()
       } else {
         const error = await response.json()
         toast.error(error.message || 'Ошибка при обновлении профиля')
@@ -174,6 +200,18 @@ export default function ProfilePage() {
     
     // Dispatch custom event to update Layout
     window.dispatchEvent(new CustomEvent('avatar-updated'))
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

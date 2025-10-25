@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   
   try {
     // Fetch user data from API
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3001'}/api/public/${username}`, {
+    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/public/${username}`, {
       cache: 'no-store'
     })
     
@@ -46,7 +46,7 @@ export default async function PublicUserPage({ params }: Props) {
   
   try {
     // Fetch user data from API
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3001'}/api/public/${username}`, {
+    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/public/${username}`, {
       cache: 'no-store'
     })
     

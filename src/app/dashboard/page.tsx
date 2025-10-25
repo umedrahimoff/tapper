@@ -76,7 +76,7 @@ export default function DashboardPage() {
     )
   }
 
-  const publicUrl = `/${userData.username}`
+  const publicUrl = typeof window !== 'undefined' ? `${window.location.origin}/${userData.username}` : `/${userData.username}`
 
   return (
     <div className="p-6">
