@@ -1,31 +1,82 @@
-import { redirect } from "next/navigation"
-import { auth } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+'use client'
+
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ExternalLink, Users, Link as LinkIcon } from "lucide-react"
+import { ExternalLink, Users, Link as LinkIcon, Eye, TrendingUp } from "lucide-react"
 
-export default async function DashboardPage() {
-  const session = await auth()
-  
-  if (!session) {
-    redirect("/")
+export default function DashboardPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [userData, setUserData] = useState({
+    name: 'Demo User',
+    username: 'demo',
+    links: [],
+    views: 0,
+    todayViews: 0,
+    thisWeekViews: 0
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/")
+      return
+    }
+
+    if (session?.user) {
+      loadUserData()
+    }
+  }, [session, status, router])
+
+  const loadUserData = async () => {
+    try {
+      // Load profile data
+      const profileResponse = await fetch('/api/profile')
+      if (profileResponse.ok) {
+        const profile = await profileResponse.json()
+        
+        // Load links data
+        const linksResponse = await fetch('/api/links')
+        let links = []
+        if (linksResponse.ok) {
+          links = await linksResponse.json()
+        }
+
+        // Load views data (mock for now)
+        const views = []
+
+        setUserData({
+          name: profile.name,
+          username: profile.username,
+          links: links,
+          views: views.length,
+          todayViews: 0,
+          thisWeekViews: 0,
+          thisMonthViews: 0
+        })
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // Mock user data for demo
-  const user = {
-    id: session.user.id,
-    name: session.user.name || 'Demo User',
-    username: session.user.username || 'demo',
-    bio: 'Добро пожаловать в Tapper!',
-    avatar: null,
-    theme: 'light',
-    links: [
-      { id: '1', title: 'Instagram', url: 'https://instagram.com/demo', order: 0, isActive: true },
-      { id: '2', title: 'Twitter', url: 'https://twitter.com/demo', order: 1, isActive: true }
-    ]
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const publicUrl = `${process.env.NEXTAUTH_URL}/${user.username}`
+  const publicUrl = `/${userData.username}`
 
   return (
     <div className="p-6">
@@ -45,7 +96,7 @@ export default async function DashboardPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Активных ссылок</p>
-                <p className="text-2xl font-semibold text-gray-900">{user.links.length}</p>
+                  <p className="text-2xl font-semibold text-gray-900">{userData.links.length}</p>
               </div>
             </div>
           </div>
@@ -57,7 +108,7 @@ export default async function DashboardPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Просмотры</p>
-                <p className="text-2xl font-semibold text-gray-900">0</p>
+                  <p className="text-2xl font-semibold text-gray-900">{userData.views}</p>
               </div>
             </div>
           </div>
@@ -134,7 +185,7 @@ export default async function DashboardPage() {
               </Link>
 
               <Link
-                href={`/${user.username}`}
+                href={`/${userData.username}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50"

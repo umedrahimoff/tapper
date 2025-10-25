@@ -1,29 +1,73 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
-import { User, Mail, Hash, FileText, Upload } from "lucide-react"
+import { User, Mail, Hash, FileText, Upload, X } from "lucide-react"
 
 export default function ProfilePage() {
   const { data: session, update } = useSession()
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     username: '',
     bio: '',
     avatar: ''
   })
+  const [avatarFileName, setAvatarFileName] = useState('')
+
+  // Функция для сжатия и изменения размера изображения
+  const compressImage = (file: File, maxWidth: number = 400, quality: number = 0.8): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const img = new Image()
+
+      img.onload = () => {
+        // Вычисляем новые размеры
+        let { width, height } = img
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width
+            width = maxWidth
+          }
+        } else {
+          if (height > maxWidth) {
+            width = (width * maxWidth) / height
+            height = maxWidth
+          }
+        }
+
+        canvas.width = width
+        canvas.height = height
+
+        // Рисуем изображение с новыми размерами
+        ctx?.drawImage(img, 0, 0, width, height)
+
+        // Конвертируем в base64 с заданным качеством
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality)
+        resolve(compressedDataUrl)
+      }
+
+      img.onerror = () => reject(new Error('Ошибка загрузки изображения'))
+      img.src = URL.createObjectURL(file)
+    })
+  }
 
   useEffect(() => {
     if (session?.user) {
+      // Load avatar from localStorage for demo
+      const savedAvatar = localStorage.getItem('user-avatar')
+      
       setFormData({
         name: session.user.name || '',
         username: session.user.username || '',
         bio: '',
-        avatar: ''
+        avatar: savedAvatar || ''
       })
     }
   }, [session])
@@ -42,6 +86,16 @@ export default function ProfilePage() {
       })
 
       if (response.ok) {
+        // Save avatar to localStorage for demo
+        if (formData.avatar) {
+          localStorage.setItem('user-avatar', formData.avatar)
+        } else {
+          localStorage.removeItem('user-avatar')
+        }
+        
+        // Dispatch custom event to update Layout
+        window.dispatchEvent(new CustomEvent('avatar-updated'))
+        
         toast.success('Профиль обновлен!')
         await update()
         router.refresh()
@@ -64,9 +118,67 @@ export default function ProfilePage() {
     }))
   }
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Проверяем тип файла
+    if (!file.type.startsWith('image/')) {
+      toast.error('Пожалуйста, выберите изображение')
+      return
+    }
+
+    // Проверяем размер файла (максимум 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Размер файла не должен превышать 10MB')
+      return
+    }
+
+    setUploading(true)
+
+    try {
+      // Сжимаем изображение
+      const compressedImage = await compressImage(file, 400, 0.8)
+      
+      // Сохраняем имя файла для отображения
+      const fileName = file.name
+      const fileExtension = fileName.split('.').pop()?.toUpperCase() || 'FILE'
+      const displayName = `${fileName.split('.')[0]}.${fileExtension}`
+      
+      setAvatarFileName(displayName)
+      setFormData(prev => ({
+        ...prev,
+        avatar: compressedImage
+      }))
+      
+      toast.success('Аватар загружен и сжат!')
+    } catch (error) {
+      console.error('Error compressing image:', error)
+      toast.error('Ошибка при обработке изображения')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleRemoveAvatar = () => {
+    setFormData(prev => ({
+      ...prev,
+      avatar: ''
+    }))
+    setAvatarFileName('')
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    // Remove from localStorage
+    localStorage.removeItem('user-avatar')
+    
+    // Dispatch custom event to update Layout
+    window.dispatchEvent(new CustomEvent('avatar-updated'))
+  }
+
   return (
     <div className="p-6">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Профиль</h1>
           <p className="mt-2 text-gray-600">
@@ -78,8 +190,8 @@ export default function ProfilePage() {
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Avatar */}
             <div className="flex items-center space-x-6">
-              <div className="flex-shrink-0">
-                <div className="h-20 w-20 rounded-full bg-indigo-100 flex items-center justify-center">
+              <div className="flex-shrink-0 relative">
+                <div className="h-20 w-20 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden">
                   {formData.avatar ? (
                     <img
                       src={formData.avatar}
@@ -92,26 +204,79 @@ export default function ProfilePage() {
                     </span>
                   )}
                 </div>
+                {formData.avatar && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    title="Удалить аватар"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </div>
-              <div>
+              <div className="flex-1">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Аватар
                 </label>
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="url"
-                    name="avatar"
-                    value={formData.avatar}
-                    onChange={handleChange}
-                    placeholder="https://example.com/avatar.jpg"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                  <button
-                    type="button"
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <Upload className="h-4 w-4" />
-                  </button>
+                <div className="space-y-3">
+                  {/* URL input */}
+                  <div>
+                    <input
+                      type="url"
+                      name="avatar"
+                      value={formData.avatar.startsWith('data:') ? '' : formData.avatar}
+                      onChange={handleChange}
+                      placeholder="https://example.com/avatar.jpg"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    {formData.avatar.startsWith('data:') && avatarFileName && (
+                      <div className="mt-2 px-3 py-2 bg-green-50 border border-green-200 rounded-md">
+                        <div className="flex items-center">
+                          <div className="text-green-600 text-sm">
+                            📁 {avatarFileName}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* File upload */}
+                  <div className="flex items-center space-x-3">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {uploading ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600 mr-2"></div>
+                          Обработка...
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <Upload className="h-4 w-4 mr-2" />
+                          Загрузить файл
+                        </div>
+                      )}
+                    </button>
+                    <span className="text-sm text-gray-500">
+                      или вставьте URL
+                    </span>
+                  </div>
+                  
+                  <p className="text-xs text-gray-500">
+                    Поддерживаются форматы: JPG, PNG, GIF. Максимальный размер: 10MB. 
+                    Изображение будет автоматически сжато до 400x400px.
+                  </p>
                 </div>
               </div>
             </div>

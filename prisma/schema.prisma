@@ -6,11 +6,12 @@
 
 generator client {
   provider = "prisma-client"
+  output   = "../src/generated"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -25,6 +26,7 @@ model User {
   updatedAt DateTime @updatedAt
   
   links Link[]
+  views View[]
   
   @@map("users")
 }
@@ -42,4 +44,17 @@ model Link {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@map("links")
+}
+
+model View {
+  id        String   @id @default(cuid())
+  userAgent String?
+  referer   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("views")
 }

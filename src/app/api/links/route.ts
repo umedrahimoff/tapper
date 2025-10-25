@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 export async function GET() {
   try {
@@ -9,11 +10,20 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    // Mock data for demo
-    const links = [
-      { id: '1', title: 'Instagram', url: 'https://instagram.com/demo', order: 0, isActive: true },
-      { id: '2', title: 'Twitter', url: 'https://twitter.com/demo', order: 1, isActive: true }
-    ]
+    const links = await prisma.link.findMany({
+      where: { 
+        userId: session.user.id,
+        isActive: true 
+      },
+      orderBy: { order: 'asc' },
+      select: {
+        id: true,
+        title: true,
+        url: true,
+        order: true,
+        isActive: true
+      }
+    })
 
     return NextResponse.json(links)
   } catch (error) {
@@ -42,15 +52,39 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Mock response for demo
-    const link = {
-      id: Date.now().toString(),
-      title,
-      url,
-      order: 0,
-      isActive: true,
-      userId: session.user.id
+    // Validate URL format
+    try {
+      new URL(url)
+    } catch {
+      return NextResponse.json(
+        { message: "Invalid URL format" },
+        { status: 400 }
+      )
     }
+
+    // Get the next order number
+    const lastLink = await prisma.link.findFirst({
+      where: { userId: session.user.id },
+      orderBy: { order: 'desc' }
+    })
+
+    const nextOrder = lastLink ? lastLink.order + 1 : 0
+
+    const link = await prisma.link.create({
+      data: {
+        title,
+        url,
+        order: nextOrder,
+        userId: session.user.id
+      },
+      select: {
+        id: true,
+        title: true,
+        url: true,
+        order: true,
+        isActive: true
+      }
+    })
 
     return NextResponse.json(link)
   } catch (error) {

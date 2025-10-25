@@ -2,6 +2,8 @@ import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import GitHubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials"
+import { prisma } from "@/lib/prisma"
+import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -29,13 +31,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null
         }
 
-        // For demo purposes, we'll create a mock user
-        // In production, you'd verify credentials against database
-        return {
-          id: '1',
-          email: credentials.email as string,
-          name: 'Demo User',
-          username: 'demo',
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string }
+          })
+
+          if (!user) {
+            return null
+          }
+
+          // For demo purposes, accept any password
+          // In production, you'd verify the password hash
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            username: user.username,
+          }
+        } catch (error) {
+          console.error("Auth error:", error)
+          return null
         }
       }
     })
@@ -44,6 +59,44 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google" || account?.provider === "github") {
+        try {
+          // Check if user exists
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! }
+          })
+
+          if (!existingUser) {
+            // Create new user
+            const username = user.email!.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '')
+            
+            // Ensure username is unique
+            let finalUsername = username
+            let counter = 1
+            while (await prisma.user.findUnique({ where: { username: finalUsername } })) {
+              finalUsername = `${username}${counter}`
+              counter++
+            }
+
+            await prisma.user.create({
+              data: {
+                email: user.email!,
+                name: user.name,
+                username: finalUsername,
+                bio: null,
+                avatar: user.image,
+                theme: 'light'
+              }
+            })
+          }
+        } catch (error) {
+          console.error("User creation error:", error)
+          return false
+        }
+      }
+      return true
+    },
     async jwt({ token, user }) {
       if (user) {
         token.username = user.username

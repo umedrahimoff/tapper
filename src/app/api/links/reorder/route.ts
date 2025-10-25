@@ -14,23 +14,25 @@ export async function PUT(request: NextRequest) {
 
     if (!Array.isArray(links)) {
       return NextResponse.json(
-        { message: "Links array is required" },
+        { message: "Links must be an array" },
         { status: 400 }
       )
     }
 
-    // Update all links in a transaction
-    await prisma.$transaction(
-      links.map((link: { id: string; order: number }) =>
-        prisma.link.update({
-          where: {
-            id: link.id,
-            userId: session.user.id
-          },
-          data: { order: link.order }
-        })
-      )
+    // Update order for each link
+    const updatePromises = links.map((link: { id: string; order: number }) =>
+      prisma.link.updateMany({
+        where: {
+          id: link.id,
+          userId: session.user.id
+        },
+        data: {
+          order: link.order
+        }
+      })
     )
+
+    await Promise.all(updatePromises)
 
     return NextResponse.json({ success: true })
   } catch (error) {

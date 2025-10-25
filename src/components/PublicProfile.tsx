@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ExternalLink, Copy, Check } from "lucide-react"
 import toast from "react-hot-toast"
 
@@ -25,6 +25,93 @@ interface PublicProfileProps {
 
 export default function PublicProfile({ user }: PublicProfileProps) {
   const [copied, setCopied] = useState(false)
+  const [userData, setUserData] = useState(user)
+
+  useEffect(() => {
+    // Track page view
+    const trackView = async () => {
+      try {
+        await fetch(`/api/views/${user.username}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userAgent: navigator.userAgent,
+            referer: document.referrer
+          })
+        })
+      } catch (error) {
+        console.error('Error tracking view:', error)
+      }
+    }
+
+    // Track view on component mount
+    trackView()
+
+    // Save view to localStorage for demo
+    const saveViewToLocalStorage = () => {
+      const viewData = {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        referer: document.referrer
+      }
+      
+      const existingViews = JSON.parse(localStorage.getItem('user-views') || '[]')
+      existingViews.push(viewData)
+      
+      // Keep only last 100 views to avoid localStorage overflow
+      if (existingViews.length > 100) {
+        existingViews.splice(0, existingViews.length - 100)
+      }
+      
+      localStorage.setItem('user-views', JSON.stringify(existingViews))
+    }
+
+    saveViewToLocalStorage()
+
+    // Load data from localStorage for demo
+    const savedAvatar = localStorage.getItem('user-avatar')
+    const savedTheme = localStorage.getItem('user-theme')
+    const savedLinks = localStorage.getItem('user-links')
+    const savedProfile = localStorage.getItem('user-profile')
+
+    let updatedUser = { ...user }
+
+    // Update avatar if available
+    if (savedAvatar) {
+      updatedUser.avatar = savedAvatar
+    }
+
+    // Update theme if available
+    if (savedTheme) {
+      updatedUser.theme = savedTheme
+    }
+
+    // Update links if available
+    if (savedLinks) {
+      try {
+        const links = JSON.parse(savedLinks)
+        updatedUser.links = links.filter((link: any) => link.isActive !== false)
+      } catch (error) {
+        console.error('Error parsing saved links:', error)
+      }
+    } else {
+      // If no saved links, use empty array
+      updatedUser.links = []
+    }
+
+    // Update profile data if available
+    if (savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile)
+        updatedUser.name = profile.name || updatedUser.name
+        updatedUser.bio = profile.bio || updatedUser.bio
+      } catch (error) {
+        console.error('Error parsing saved profile:', error)
+      }
+    }
+
+    setUserData(updatedUser)
+  }, [user])
 
   const copyUrl = async () => {
     try {
@@ -38,7 +125,7 @@ export default function PublicProfile({ user }: PublicProfileProps) {
   }
 
   const getThemeClasses = () => {
-    switch (user.theme) {
+    switch (userData.theme) {
       case 'dark':
         return {
           bg: 'bg-gray-900',
@@ -73,27 +160,27 @@ export default function PublicProfile({ user }: PublicProfileProps) {
       <div className="max-w-md mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          {user.avatar ? (
+          {userData.avatar ? (
             <img
-              src={user.avatar}
-              alt={user.name || user.username}
+              src={userData.avatar}
+              alt={userData.name || userData.username}
               className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
             />
           ) : (
             <div className="w-24 h-24 rounded-full mx-auto mb-4 bg-indigo-100 flex items-center justify-center">
               <span className="text-2xl font-bold text-indigo-600">
-                {(user.name || user.username).charAt(0).toUpperCase()}
+                {(userData.name || userData.username).charAt(0).toUpperCase()}
               </span>
             </div>
           )}
           
           <h1 className="text-2xl font-bold mb-2">
-            {user.name || user.username}
+            {userData.name || userData.username}
           </h1>
           
-          {user.bio && (
+          {userData.bio && (
             <p className="text-sm opacity-80 mb-4">
-              {user.bio}
+              {userData.bio}
             </p>
           )}
 
@@ -116,22 +203,30 @@ export default function PublicProfile({ user }: PublicProfileProps) {
         </div>
 
         {/* Links */}
-        <div className="space-y-3">
-          {user.links.map((link) => (
-            <a
-              key={link.id}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`block w-full px-6 py-4 rounded-xl text-center font-medium transition-all duration-200 hover:scale-105 ${theme.link}`}
-            >
-              <div className="flex items-center justify-center">
-                <span className="mr-2">{link.title}</span>
-                <ExternalLink className="w-4 h-4" />
-              </div>
-            </a>
-          ))}
-        </div>
+        {userData.links.length > 0 ? (
+          <div className="space-y-3">
+            {userData.links.map((link) => (
+              <a
+                key={link.id}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`block w-full px-6 py-4 rounded-xl text-center font-medium transition-all duration-200 hover:scale-105 ${theme.link}`}
+              >
+                <div className="flex items-center justify-center">
+                  <span className="mr-2">{link.title}</span>
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-sm opacity-60">
+              Ссылки пока не добавлены
+            </p>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center mt-8">

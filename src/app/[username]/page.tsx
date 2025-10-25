@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation"
-import { prisma } from "@/lib/prisma"
 import { Metadata } from "next"
 import PublicProfile from "@/components/PublicProfile"
 
@@ -9,41 +8,56 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params
-  // Mock user data for demo
-  const user = {
-    name: 'Demo User',
-    username: username,
-    bio: 'Добро пожаловать в Tapper!',
-    avatar: null
-  }
+  
+  try {
+    // Fetch user data from API
+    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3001'}/api/public/${username}`, {
+      cache: 'no-store'
+    })
+    
+    if (!response.ok) {
+      return {
+        title: 'Пользователь не найден - Tapper',
+        description: 'Пользователь не найден',
+      }
+    }
+    
+    const user = await response.json()
 
-  return {
-    title: `${user.name} - Tapper`,
-    description: user.bio || `Персональная страница ${user.name}`,
-    openGraph: {
+    return {
       title: `${user.name} - Tapper`,
       description: user.bio || `Персональная страница ${user.name}`,
-      images: user.avatar ? [user.avatar] : [],
-    },
+      openGraph: {
+        title: `${user.name} - Tapper`,
+        description: user.bio || `Персональная страница ${user.name}`,
+        images: user.avatar ? [user.avatar] : [],
+      },
+    }
+  } catch (error) {
+    return {
+      title: 'Пользователь не найден - Tapper',
+      description: 'Пользователь не найден',
+    }
   }
 }
 
 export default async function PublicUserPage({ params }: Props) {
   const { username } = await params
-  // Mock user data for demo
-  const user = {
-    id: '1',
-    name: 'Demo User',
-    username: username,
-    bio: 'Добро пожаловать в Tapper!',
-    avatar: null,
-    theme: 'light',
-    links: [
-      { id: '1', title: 'Instagram', url: 'https://instagram.com/demo', order: 0, isActive: true },
-      { id: '2', title: 'Twitter', url: 'https://twitter.com/demo', order: 1, isActive: true },
-      { id: '3', title: 'GitHub', url: 'https://github.com/demo', order: 2, isActive: true }
-    ]
-  }
+  
+  try {
+    // Fetch user data from API
+    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3001'}/api/public/${username}`, {
+      cache: 'no-store'
+    })
+    
+    if (!response.ok) {
+      notFound()
+    }
+    
+    const user = await response.json()
 
-  return <PublicProfile user={user} />
+    return <PublicProfile user={user} />
+  } catch (error) {
+    notFound()
+  }
 }

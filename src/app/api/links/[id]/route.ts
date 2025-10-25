@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 export async function PUT(
   request: NextRequest,
@@ -12,6 +13,7 @@ export async function PUT(
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
+    const { id } = await params
     const { title, url } = await request.json()
 
     if (!title || !url) {
@@ -21,19 +23,44 @@ export async function PUT(
       )
     }
 
-    const { id } = await params
-    
-    // Mock response for demo
-    const link = {
-      id,
-      title,
-      url,
-      order: 0,
-      isActive: true,
-      userId: session.user.id
+    // Validate URL format
+    try {
+      new URL(url)
+    } catch {
+      return NextResponse.json(
+        { message: "Invalid URL format" },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json(link)
+    // Check if link belongs to user
+    const existingLink = await prisma.link.findFirst({
+      where: {
+        id,
+        userId: session.user.id
+      }
+    })
+
+    if (!existingLink) {
+      return NextResponse.json(
+        { message: "Link not found" },
+        { status: 404 }
+      )
+    }
+
+    const updatedLink = await prisma.link.update({
+      where: { id },
+      data: { title, url },
+      select: {
+        id: true,
+        title: true,
+        url: true,
+        order: true,
+        isActive: true
+      }
+    })
+
+    return NextResponse.json(updatedLink)
   } catch (error) {
     console.error("Link update error:", error)
     return NextResponse.json(
@@ -55,8 +82,26 @@ export async function DELETE(
     }
 
     const { id } = await params
-    
-    // Mock response for demo
+
+    // Check if link belongs to user
+    const existingLink = await prisma.link.findFirst({
+      where: {
+        id,
+        userId: session.user.id
+      }
+    })
+
+    if (!existingLink) {
+      return NextResponse.json(
+        { message: "Link not found" },
+        { status: 404 }
+      )
+    }
+
+    await prisma.link.delete({
+      where: { id }
+    })
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Link deletion error:", error)
