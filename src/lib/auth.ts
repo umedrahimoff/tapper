@@ -6,6 +6,12 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/signin',
+  },
+  secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-demo",
+  trustHost: true,
   providers: [
     // Only add OAuth providers if environment variables are set
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
@@ -68,6 +74,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Always redirect to the base URL for production
+      if (process.env.NODE_ENV === 'production') {
+        return baseUrl
+      }
+      // In development, allow relative URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      // Allow external URLs in development
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
+    },
     async signIn({ user, account, profile }) {
       if (account?.provider === "google" || account?.provider === "github") {
         try {
