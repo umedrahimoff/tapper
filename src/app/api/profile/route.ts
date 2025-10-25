@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { getCached, setCached, deleteCached, deleteCachedPattern } from "@/lib/redis"
+import { handleApiError } from "@/lib/error-handler"
 
 export async function GET() {
   try {
@@ -29,11 +30,7 @@ export async function GET() {
 
     return NextResponse.json(user)
   } catch (error) {
-    console.error("Profile fetch error:", error)
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    )
+    return handleApiError(error, "Profile fetch")
   }
 }
 
@@ -94,10 +91,6 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(updatedUser)
   } catch (error) {
-    console.error("Profile update error:", error)
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    )
+    return handleApiError(error, "Profile update")
   }
 }

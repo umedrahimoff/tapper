@@ -11,16 +11,24 @@ if (process.env.NODE_ENV === 'development' && !process.env.REDIS_HOST) {
   // В development без Redis - используем заглушку
   redis = null
 } else {
-  redis = globalForRedis.redis ?? new Redis({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    password: process.env.REDIS_PASSWORD,
-    maxRetriesPerRequest: 3,
-    lazyConnect: true,
-  })
+  try {
+    redis = globalForRedis.redis ?? new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      maxRetriesPerRequest: 3,
+      lazyConnect: true,
+      retryDelayOnFailover: 100,
+      connectTimeout: 10000,
+      commandTimeout: 5000,
+    })
 
-  if (process.env.NODE_ENV !== 'production') {
-    globalForRedis.redis = redis
+    if (process.env.NODE_ENV !== 'production') {
+      globalForRedis.redis = redis
+    }
+  } catch (error) {
+    console.warn('Redis connection failed, using fallback:', error)
+    redis = null
   }
 }
 
