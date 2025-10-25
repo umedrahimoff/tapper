@@ -18,7 +18,6 @@ if (process.env.NODE_ENV === 'development' && !process.env.REDIS_HOST) {
       password: process.env.REDIS_PASSWORD,
       maxRetriesPerRequest: 3,
       lazyConnect: true,
-      retryDelayOnFailover: 100,
       connectTimeout: 10000,
       commandTimeout: 5000,
     })
