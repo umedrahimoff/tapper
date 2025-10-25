@@ -3,12 +3,11 @@ import type { NextRequest } from "next/server"
 
 export function middleware(request: NextRequest) {
   // Simple middleware that just passes through all requests
-  // Authentication will be handled by NextAuth.js
   return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 }

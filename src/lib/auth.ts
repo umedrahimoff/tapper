@@ -75,54 +75,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    async redirect({ url, baseUrl }) {
-      // Always redirect to the base URL for production
-      if (process.env.NODE_ENV === 'production') {
-        return baseUrl
-      }
-      // In development, allow relative URLs
-      if (url.startsWith('/')) return `${baseUrl}${url}`
-      // Allow external URLs in development
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
-    },
-    async signIn({ user, account, profile }) {
-      if (account?.provider === "google" || account?.provider === "github") {
-        try {
-          // Check if user exists
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! }
-          })
-
-          if (!existingUser) {
-            // Create new user
-            const username = user.email!.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '')
-            
-            // Ensure username is unique
-            let finalUsername = username
-            let counter = 1
-            while (await prisma.user.findUnique({ where: { username: finalUsername } })) {
-              finalUsername = `${username}${counter}`
-              counter++
-            }
-
-            await prisma.user.create({
-              data: {
-                email: user.email!,
-                name: user.name,
-                username: finalUsername,
-                bio: null,
-                avatar: user.image,
-                theme: 'light'
-              }
-            })
-          }
-        } catch (error) {
-          return false
-        }
-      }
-      return true
-    },
     async jwt({ token, user }) {
       if (user) {
         token.username = user.username

@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Next.js 15 configuration
-  output: 'standalone',
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs']
   },
@@ -14,17 +13,14 @@ const nextConfig = {
       },
     ],
   },
-  // Ensure proper chunk loading
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      }
-    }
-    return config
+  // Disable static optimization for problematic pages
+  trailingSlash: false,
+  // Ensure proper asset handling
+  assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
+  // Disable problematic optimizations
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 }
 
