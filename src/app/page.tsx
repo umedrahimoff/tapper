@@ -20,13 +20,13 @@ export default async function HomePage() {
           </p>
           <div className="space-y-4">
             <a
-              href="/api/auth/signin"
+              href="/auth/signin"
               className="block w-full py-3 px-4 border border-transparent text-center text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Начать создание
+              Войти в аккаунт
             </a>
             <p className="text-sm text-gray-500">
-              Бесплатно • Быстро • Просто
+              Безопасно • Быстро • Просто
             </p>
           </div>
         </div>

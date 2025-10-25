@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { getCached, setCached } from "@/lib/redis"
 
 export async function GET(
   request: NextRequest,
@@ -7,7 +8,15 @@ export async function GET(
 ) {
   try {
     const { username } = await params
+    const cacheKey = `public:${username}`
 
+    // Проверяем кэш
+    const cached = await getCached(cacheKey)
+    if (cached) {
+      return NextResponse.json(cached)
+    }
+
+    // Загружаем из базы данных
     const user = await prisma.user.findUnique({
       where: { username },
       select: {
@@ -36,6 +45,9 @@ export async function GET(
         { status: 404 }
       )
     }
+
+    // Кэшируем на 10 минут
+    await setCached(cacheKey, user, 600)
 
     return NextResponse.json(user)
   } catch (error) {

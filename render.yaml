@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: tapper
+    env: node
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tapper-db
+          property: connectionString
+      - key: NEXTAUTH_URL
+        value: https://tapper.onrender.com
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: tapper-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: tapper-redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          type: redis
+          name: tapper-redis
+          property: password
+
+databases:
+  - name: tapper-db
+    plan: free
+    databaseName: tapper
+    user: tapper
+
+  - name: tapper-redis
+    type: redis
+    plan: free

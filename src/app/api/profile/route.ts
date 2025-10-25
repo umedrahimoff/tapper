@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { getCached, setCached, deleteCached, deleteCachedPattern } from "@/lib/redis"
 
 export async function GET() {
   try {
@@ -86,6 +87,10 @@ export async function PUT(request: NextRequest) {
         email: true
       }
     })
+
+    // Очищаем кэш профиля и публичной страницы
+    await deleteCached(`profile:${session.user.id}`)
+    await deleteCachedPattern(`public:${updatedUser.username}`)
 
     return NextResponse.json(updatedUser)
   } catch (error) {

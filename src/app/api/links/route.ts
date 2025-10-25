@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { getCached, setCached, deleteCached } from "@/lib/redis"
 
 export async function GET() {
   try {
@@ -8,6 +9,14 @@ export async function GET() {
     
     if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+    }
+
+    const cacheKey = `links:${session.user.id}`
+    
+    // Проверяем кэш
+    const cached = await getCached(cacheKey)
+    if (cached) {
+      return NextResponse.json(cached)
     }
 
     const links = await prisma.link.findMany({
@@ -24,6 +33,9 @@ export async function GET() {
         isActive: true
       }
     })
+
+    // Кэшируем на 5 минут
+    await setCached(cacheKey, links, 300)
 
     return NextResponse.json(links)
   } catch (error) {
@@ -85,6 +97,9 @@ export async function POST(request: NextRequest) {
         isActive: true
       }
     })
+
+    // Очищаем кэш ссылок пользователя
+    await deleteCached(`links:${session.user.id}`)
 
     return NextResponse.json(link)
   } catch (error) {

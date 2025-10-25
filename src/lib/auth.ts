@@ -36,12 +36,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             where: { email: credentials.email as string }
           })
 
-          if (!user) {
+          if (!user || !user.password) {
             return null
           }
 
-          // For demo purposes, accept any password
-          // In production, you'd verify the password hash
+          // Verify password
+          const isValidPassword = await bcrypt.compare(
+            credentials.password as string,
+            user.password
+          )
+
+          if (!isValidPassword) {
+            return null
+          }
+
           return {
             id: user.id,
             email: user.email,
