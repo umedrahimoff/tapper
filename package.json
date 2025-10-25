@@ -13,6 +13,7 @@
     "create-user": "node scripts/create-user.js",
     "create-production-user": "node scripts/create-production-user.js",
     "create-admin": "node scripts/create-admin-api.js",
+    "setup-production": "node scripts/setup-production.js",
     "postinstall": "prisma generate",
     "prisma:deploy": "prisma migrate deploy"
   },
