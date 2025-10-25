@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Hide Next.js dev toolbar and overlay */
+[data-nextjs-dev-toolbar],
+[data-nextjs-dev-overlay],
+.nextjs-container-build-error,
+.__next-build-watcher {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
