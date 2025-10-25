@@ -1,33 +1,31 @@
-import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export default auth((req) => {
-  const { nextUrl } = req
-  const isLoggedIn = !!req.auth
-
-  // Protect dashboard routes
-  if (nextUrl.pathname.startsWith('/dashboard')) {
-    if (!isLoggedIn) {
-      return NextResponse.redirect(new URL('/auth/signin', nextUrl))
-    }
-  }
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
   // Allow public routes
-  if (nextUrl.pathname === '/' || 
-      nextUrl.pathname.startsWith('/api/auth') ||
-      nextUrl.pathname.startsWith('/auth') ||
-      nextUrl.pathname.startsWith('/_next') ||
-      nextUrl.pathname.startsWith('/favicon.ico')) {
+  if (pathname === '/' || 
+      pathname.startsWith('/api/auth') ||
+      pathname.startsWith('/auth') ||
+      pathname.startsWith('/_next') ||
+      pathname.startsWith('/favicon.ico') ||
+      pathname.startsWith('/api/')) {
     return NextResponse.next()
   }
 
-  // Handle dynamic username routes
-  if (nextUrl.pathname.length > 1 && !nextUrl.pathname.startsWith('/api') && !nextUrl.pathname.startsWith('/dashboard')) {
+  // Handle dynamic username routes (public pages)
+  if (pathname.length > 1 && !pathname.startsWith('/dashboard') && !pathname.startsWith('/api')) {
+    return NextResponse.next()
+  }
+
+  // For dashboard routes, let NextAuth handle authentication
+  if (pathname.startsWith('/dashboard')) {
     return NextResponse.next()
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: [
