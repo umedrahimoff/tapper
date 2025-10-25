@@ -140,9 +140,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session
     },
   },
-  pages: {
-    signIn: "/auth/signin",
-  },
-  secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-demo",
-  trustHost: true,
 })
