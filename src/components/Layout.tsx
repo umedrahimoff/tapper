@@ -14,6 +14,7 @@ import {
   LogIn,
   Shield
 } from "lucide-react"
+import { safeLocalStorage } from "@/lib/storage"
 
 const navigation = [
   { name: 'Обзор', href: '/dashboard', icon: Home },
@@ -30,14 +31,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Load avatar from localStorage for demo
-    const savedAvatar = localStorage.getItem('user-avatar')
+    const savedAvatar = safeLocalStorage.getItem('user-avatar')
     if (savedAvatar) {
       setUserAvatar(savedAvatar)
     }
 
     // Listen for avatar updates
     const handleStorageChange = () => {
-      const newAvatar = localStorage.getItem('user-avatar')
+      const newAvatar = safeLocalStorage.getItem('user-avatar')
       setUserAvatar(newAvatar || '')
     }
 

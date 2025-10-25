@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
 import { User, Mail, Hash, FileText, Upload, X } from "lucide-react"
+import { safeLocalStorage } from "@/lib/storage"
 
 export default function ProfilePage() {
   const { data: session, update } = useSession()
@@ -72,7 +73,7 @@ export default function ProfilePage() {
         const profileData = await response.json()
         
         // Load avatar from localStorage for demo
-        const savedAvatar = localStorage.getItem('user-avatar')
+        const savedAvatar = safeLocalStorage.getItem('user-avatar')
         
         setFormData({
           name: profileData.name || '',
@@ -106,9 +107,9 @@ export default function ProfilePage() {
         
         // Save avatar to localStorage for demo
         if (formData.avatar) {
-          localStorage.setItem('user-avatar', formData.avatar)
+          safeLocalStorage.setItem('user-avatar', formData.avatar)
         } else {
-          localStorage.removeItem('user-avatar')
+          safeLocalStorage.removeItem('user-avatar')
         }
         
         // Update local form data with the response

@@ -79,12 +79,14 @@ export default function LinksPage() {
   const fetchLinks = async () => {
     try {
       // First try to load from localStorage for demo
-      const savedLinks = localStorage.getItem('user-links')
-      if (savedLinks) {
-        const links = JSON.parse(savedLinks)
-        setLinks(links.sort((a: Link, b: Link) => a.order - b.order))
-        setLoading(false)
-        return
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const savedLinks = localStorage.getItem('user-links')
+        if (savedLinks) {
+          const links = JSON.parse(savedLinks)
+          setLinks(links.sort((a: Link, b: Link) => a.order - b.order))
+          setLoading(false)
+          return
+        }
       }
       
       // Fallback to API
@@ -122,8 +124,10 @@ export default function LinksPage() {
         setShowAddForm(false)
         
         // Save to localStorage for demo
-        const updatedLinks = [...links, newLink].sort((a, b) => a.order - b.order)
-        localStorage.setItem('user-links', JSON.stringify(updatedLinks))
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const updatedLinks = [...links, newLink].sort((a, b) => a.order - b.order)
+          localStorage.setItem('user-links', JSON.stringify(updatedLinks))
+        }
         
         fetchLinks()
       } else {
