@@ -4,7 +4,7 @@ import { Metadata } from "next"
 import PublicProfile from "@/components/PublicProfile"
 
 interface Props {
-  params: { username: string }
+  params: Promise<{ username: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
