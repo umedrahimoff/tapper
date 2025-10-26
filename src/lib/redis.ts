@@ -7,8 +7,8 @@ const globalForRedis = globalThis as unknown as {
 // В development режиме отключаем Redis если не настроен
 let redis: Redis | null = null
 
-if (process.env.NODE_ENV === 'development' && !process.env.REDIS_HOST) {
-  // В development без Redis - используем заглушку
+if ((process.env.NODE_ENV === 'development' && !process.env.REDIS_HOST) || !process.env.REDIS_HOST) {
+  // В development без Redis или в продакшене без Redis - используем заглушку
   redis = null
 } else {
   try {
