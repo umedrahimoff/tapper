@@ -14,7 +14,6 @@ import {
   LogIn,
   Shield
 } from "lucide-react"
-import { safeLocalStorage } from "@/lib/storage"
 
 const navigation = [
   { name: 'Обзор', href: '/dashboard', icon: Home },
@@ -30,25 +29,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [userAvatar, setUserAvatar] = useState<string>('')
 
   useEffect(() => {
-    // Load avatar from localStorage
-    const savedAvatar = safeLocalStorage.getItem('user-avatar')
-    if (savedAvatar) {
-      setUserAvatar(savedAvatar)
-    }
-
     // Listen for avatar updates
     const handleStorageChange = () => {
-      const newAvatar = safeLocalStorage.getItem('user-avatar')
-      setUserAvatar(newAvatar || '')
+      // Avatar updates handled via session
     }
 
-    window.addEventListener('storage', handleStorageChange)
-    
-    // Also listen for custom events (for same-tab updates)
+    // Listen for custom events (for same-tab updates)
     window.addEventListener('avatar-updated', handleStorageChange)
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('avatar-updated', handleStorageChange)
     }
   }, [])

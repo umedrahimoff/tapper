@@ -125,7 +125,6 @@ export async function GET() {
       dailyStats
     })
   } catch (error) {
-    console.error("Admin stats fetch error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

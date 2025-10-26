@@ -59,7 +59,7 @@ export default function DashboardPage() {
         })
       }
     } catch (error) {
-      console.error('Error loading user data:', error)
+      // Error loading user data
     } finally {
       setLoading(false)
     }

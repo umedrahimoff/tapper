@@ -39,7 +39,6 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("View tracking error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

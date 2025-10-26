@@ -166,11 +166,6 @@ export default function LinksPage() {
 
       if (response.ok) {
         toast.success('Ссылка удалена!')
-        
-        // Update localStorage for demo
-        const updatedLinks = links.filter(link => link.id !== id)
-        localStorage.setItem('user-links', JSON.stringify(updatedLinks))
-        
         fetchLinks()
       } else {
         toast.error('Ошибка при удалении ссылки')

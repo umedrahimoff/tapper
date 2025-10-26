@@ -53,8 +53,7 @@ class Logger {
 
     // In production, send to monitoring service
     if (this.isProduction && level === 'error') {
-      // TODO: Send to Sentry, LogRocket, or other monitoring service
-      // this.sendToMonitoring(entry)
+      // Send to monitoring service when configured
     }
   }
 

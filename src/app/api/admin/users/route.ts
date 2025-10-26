@@ -74,7 +74,6 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error("Admin users fetch error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
@@ -152,7 +151,6 @@ export async function POST(request: NextRequest) {
       user
     })
   } catch (error) {
-    console.error("Admin user creation error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

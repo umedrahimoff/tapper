@@ -22,8 +22,6 @@ export default function NewUserPage() {
     setLoading(true)
 
     try {
-      console.log('Sending user data:', formData)
-      
       const response = await fetch('/api/admin/users', {
         method: 'POST',
         headers: {
@@ -33,7 +31,6 @@ export default function NewUserPage() {
       })
 
       const data = await response.json()
-      console.log('Response:', data)
 
       if (response.ok) {
         toast.success('Пользователь создан успешно!')

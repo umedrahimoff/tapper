@@ -24,7 +24,6 @@ export async function GET() {
 
     return NextResponse.json(user)
   } catch (error) {
-    console.error("Theme fetch error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
@@ -60,7 +59,6 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(updatedUser)
   } catch (error) {
-    console.error("Theme update error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

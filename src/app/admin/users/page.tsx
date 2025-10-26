@@ -78,7 +78,7 @@ export default function AdminUsersPage() {
         router.push('/dashboard')
       }
     } catch (error) {
-      console.error('Error fetching users:', error)
+      toast.error('Ошибка при загрузке пользователей')
     } finally {
       setLoading(false)
     }
@@ -112,7 +112,6 @@ export default function AdminUsersPage() {
         toast.error('Ошибка изменения статуса')
       }
     } catch (error) {
-      console.error('Error updating user:', error)
       toast.error('Ошибка сети')
     }
   }
@@ -131,7 +130,7 @@ export default function AdminUsersPage() {
         fetchUsers() // Refresh the list
       }
     } catch (error) {
-      console.error('Error deleting user:', error)
+      toast.error('Ошибка при удалении пользователя')
     }
   }
 

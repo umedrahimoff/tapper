@@ -84,8 +84,6 @@ export default function UserDetailPage() {
       if (response.ok) {
         const updatedUser = await response.json()
         
-        console.log('Updated user data:', updatedUser)
-        
         // Update local state with the response
         setUser(updatedUser)
         setEditData({

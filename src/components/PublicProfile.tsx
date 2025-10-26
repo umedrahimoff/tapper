@@ -40,7 +40,7 @@ export default function PublicProfile({ user }: PublicProfileProps) {
           })
         })
       } catch (error) {
-        console.error('Error tracking view:', error)
+        // Error tracking view
       }
     }
 

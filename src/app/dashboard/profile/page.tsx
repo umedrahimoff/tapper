@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
 import { User, Mail, Hash, FileText, Upload, X } from "lucide-react"
-import { safeLocalStorage } from "@/lib/storage"
 
 export default function ProfilePage() {
   const { data: session, update } = useSession()
@@ -72,18 +71,15 @@ export default function ProfilePage() {
       if (response.ok) {
         const profileData = await response.json()
         
-        // Load avatar from localStorage
-        const savedAvatar = safeLocalStorage.getItem('user-avatar')
-        
         setFormData({
           name: profileData.name || '',
           username: profileData.username || '',
           bio: profileData.bio || '',
-          avatar: savedAvatar || profileData.avatar || ''
+          avatar: profileData.avatar || ''
         })
       }
     } catch (error) {
-      console.error('Error loading profile data:', error)
+      toast.error('Ошибка при загрузке профиля')
     } finally {
       setInitialLoading(false)
     }
@@ -104,13 +100,6 @@ export default function ProfilePage() {
 
       if (response.ok) {
         const updatedUser = await response.json()
-        
-        // Save avatar to localStorage
-        if (formData.avatar) {
-          safeLocalStorage.setItem('user-avatar', formData.avatar)
-        } else {
-          safeLocalStorage.removeItem('user-avatar')
-        }
         
         // Update local form data with the response
         setFormData(prev => ({
@@ -180,7 +169,6 @@ export default function ProfilePage() {
       
       toast.success('Аватар загружен и сжат!')
     } catch (error) {
-      console.error('Error compressing image:', error)
       toast.error('Ошибка при обработке изображения')
     } finally {
       setUploading(false)
@@ -196,8 +184,6 @@ export default function ProfilePage() {
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
-    // Remove from localStorage
-    localStorage.removeItem('user-avatar')
     
     // Dispatch custom event to update Layout
     window.dispatchEvent(new CustomEvent('avatar-updated'))

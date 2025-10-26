@@ -67,7 +67,6 @@ export async function GET(
 
     return NextResponse.json(user)
   } catch (error) {
-    console.error("Admin user fetch error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
@@ -149,7 +148,6 @@ export async function PUT(
 
     return NextResponse.json(updatedUser)
   } catch (error) {
-    console.error("Admin user update error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
@@ -197,7 +195,6 @@ export async function DELETE(
       message: "User deleted successfully"
     })
   } catch (error) {
-    console.error("Admin user deletion error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

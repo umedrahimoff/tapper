@@ -62,7 +62,6 @@ export async function PUT(
 
     return NextResponse.json(updatedLink)
   } catch (error) {
-    console.error("Link update error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
@@ -104,7 +103,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Link deletion error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

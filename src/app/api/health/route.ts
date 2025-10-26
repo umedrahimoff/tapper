@@ -13,8 +13,6 @@ export async function GET() {
       environment: process.env.NODE_ENV
     })
   } catch (error) {
-    console.error('Health check failed:', error)
-    
     return NextResponse.json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),

@@ -36,7 +36,6 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Links reorder error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

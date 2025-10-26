@@ -39,7 +39,6 @@ export async function GET() {
 
     return NextResponse.json(links)
   } catch (error) {
-    console.error("Links fetch error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
@@ -103,7 +102,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(link)
   } catch (error) {
-    console.error("Link creation error:", error)
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
